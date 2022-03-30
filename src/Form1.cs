@@ -109,26 +109,27 @@ namespace fshwrite
         /// </summary>
         /// <param name="code">The bitmap type in the fsh entry header </param>
         /// <param name="output">The output file to write to</param>
-        private unsafe void WriteFsh(int code, Stream output)
+        private unsafe void WriteFsh(int code, string output)
         {
-            using (MemoryStream ms = new MemoryStream())
+            using (FileStream stream = new FileStream(output, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8))
             {
                 //write header
-                ms.Write(Encoding.ASCII.GetBytes("SHPI"), 0, 4);
-                ms.Write(BitConverter.GetBytes(0), 0, 4); // placeholder for the length
-                ms.Write(BitConverter.GetBytes(1), 0, 4); // one image in the fsh
-                ms.Write(Encoding.ASCII.GetBytes("G264"), 0, 4);
+                writer.Write(Encoding.ASCII.GetBytes("SHPI"), 0, 4);
+                writer.Write(0); // placeholder for the length
+                writer.Write(1); // one image in the fsh
+                writer.Write(Encoding.ASCII.GetBytes("G264"), 0, 4);
                 //write directory
-                ms.Write(Encoding.ASCII.GetBytes(dirname), 0, 4); // directory id
-                ms.Write(BitConverter.GetBytes(((int)ms.Position + 4)), 0, 4); // Write the Entry offset -- 24
+                writer.Write(Encoding.ASCII.GetBytes(dirname), 0, 4); // directory id
+                writer.Write((int)(writer.BaseStream.Position + 4)); // Write the Entry offset -- 24
                 // write entry header
-                ms.Write(BitConverter.GetBytes(code), 0, 4); // write the Entry bitmap code
-                ms.Write(BitConverter.GetBytes((short)color.Width), 0, 2);
-                ms.Write(BitConverter.GetBytes((short)color.Height), 0, 2);
+                writer.Write(code); // write the Entry bitmap code
+                writer.Write((short)color.Width);
+                writer.Write((short)color.Height);
 
                 for (int m = 0; m < 4; m++)
                 {
-                    ms.Write(BitConverter.GetBytes((short)0), 0, 2);// write misc data
+                    writer.Write((short)0);// write misc data
                 }
 
                 if (code == 0x7F) // 24-bit RGB
@@ -144,7 +145,7 @@ namespace fshwrite
                             px[0] = p[0];
                             px[1] = p[1];
                             px[2] = p[2];
-                            ms.Write(px, 0, 3);
+                            writer.Write(px, 0, 3);
                             p += 3;
                         }
                     }
@@ -173,7 +174,7 @@ namespace fshwrite
                             px[1] = p[1];
                             px[2] = p[2];
                             px[3] = a[0];
-                            ms.Write(px, 0, 4);
+                            writer.Write(px, 0, 4);
                             p += 4;
                             a += 4;
                         }
@@ -196,7 +197,7 @@ namespace fshwrite
 
                     byte[] data = Squish.CompressImage(temp, flags);
 
-                    ms.Write(data, 0, data.Length);
+                    writer.Write(data, 0, data.Length);
                 }
                 else if (code == 0x61) // DXT3
                 {
@@ -212,12 +213,11 @@ namespace fshwrite
 
                     byte[] data = Squish.CompressImage(temp, flags);
 
-                    ms.Write(data, 0, data.Length);
+                    writer.Write(data, 0, data.Length);
                 }
 
-                ms.Position = 4L;
-                ms.Write(BitConverter.GetBytes((int)ms.Length), 0, 4); // write the files length
-                ms.WriteTo(output); // write the memory stream to the file
+                writer.BaseStream.Position = 4L;
+                writer.Write((int)writer.BaseStream.Length); // write the file length
             }
         }
 
@@ -225,7 +225,6 @@ namespace fshwrite
         {
             if (color != null)
             {
-                FileStream fs = null;
                 try
                 {
                     string dir;
@@ -239,11 +238,7 @@ namespace fshwrite
                     }
                     string name = GetFshName();
 
-                    string fn = Path.Combine(dir, name);
-                    fs = new FileStream(fn, FileMode.Create, FileAccess.Write);
-                    WriteFsh(type, fs);
-                    fs.Close();
-                    fs = null;
+                    WriteFsh(type, Path.Combine(dir, name));
                 }
                 catch (Exception ex)
                 {
@@ -252,11 +247,6 @@ namespace fshwrite
                 }
                 finally
                 {
-                    if (fs != null)
-                    {
-                        fs.Close();
-                        fs = null;
-                    }
                     bmpbox.Text = string.Empty;
                     alphabox.Text = string.Empty;
                     color = null;
