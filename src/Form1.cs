@@ -133,6 +133,7 @@ namespace fshwrite
 
                 if (code == 0x7F) // 24-bit RGB
                 {
+                    byte[] px = new byte[3];
                     BitmapData d = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
                     for (int y = 0; y < color.Height; y++)
@@ -140,7 +141,9 @@ namespace fshwrite
                         byte* p = (byte*)d.Scan0 + (y * color.Width * 3);
                         for (int x = 0; x < color.Width; x++)
                         {
-                            byte[] px = new byte[] { p[0], p[1], p[2] };
+                            px[0] = p[0];
+                            px[1] = p[1];
+                            px[2] = p[2];
                             ms.Write(px, 0, 3);
                             p += 3;
                         }
@@ -155,6 +158,7 @@ namespace fshwrite
                         PrepareAlpha();
                     }
 
+                    byte[] px = new byte[4];
                     BitmapData d = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
                     BitmapData al = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
@@ -165,7 +169,10 @@ namespace fshwrite
 
                         for (int x = 0; x < color.Width; x++)
                         {
-                            byte[] px = new byte[] { p[0], p[1], p[2], a[0] };
+                            px[0] = p[0];
+                            px[1] = p[1];
+                            px[2] = p[2];
+                            px[3] = a[0];
                             ms.Write(px, 0, 4);
                             p += 4;
                             a += 4;
