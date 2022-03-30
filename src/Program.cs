@@ -5,6 +5,7 @@ using System;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
 namespace fshwrite
@@ -148,7 +149,8 @@ namespace fshwrite
                                     {
                                         if (form.hasSSE2)
                                         {
-                                            if (form.alpha != null)
+                                            // Images with one-bit alpha (all values either 0 or 255) can use DXT1 instead of DXT3.
+                                            if (form.alpha != null && !IsOneBitAlpha(form.alpha))
                                             {
                                                 form.TypeBox1.SelectedIndex = 3; //Dxt3
                                             }
@@ -189,6 +191,40 @@ namespace fshwrite
                 MessageBox.Show(ex.Message, "fshwrite", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
+        }
+
+        private static unsafe bool IsOneBitAlpha(Bitmap alpha)
+        {
+            int width = alpha.Width;
+            int height = alpha.Height;
+
+            BitmapData data = alpha.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            try
+            {
+                byte* scan0 = (byte*)data.Scan0.ToPointer();
+                int stride = data.Stride;
+
+                for (int y = 0; y < height; y++)
+                {
+                    byte* p = scan0 + (y * stride);
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (*p > 0 && *p < 255)
+                        {
+                            return false;
+                        }
+
+                        p += 3;
+                    }
+                }
+            }
+            finally
+            {
+                alpha.UnlockBits(data);
+            }
+
+            return true;
         }
 
         private static void ShowHelp()
