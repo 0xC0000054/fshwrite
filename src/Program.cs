@@ -44,7 +44,10 @@ namespace fshwrite
                         {
                             string arg = args[i];
 
-                            if (arg.StartsWith("/b:") || arg.StartsWith("/a:") || arg.StartsWith("/outdir:") || arg.StartsWith("/fshname:"))
+                            if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase)
+                                || arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase)
+                                || arg.StartsWith("/outdir:", StringComparison.OrdinalIgnoreCase)
+                                || arg.StartsWith("/fshname:", StringComparison.OrdinalIgnoreCase))
                             {
                                 count++;
                             }
@@ -56,9 +59,12 @@ namespace fshwrite
                         {
                             string arg = args[i];
 
-                            if (arg.StartsWith("/b:") || arg.StartsWith("/a:") || arg.StartsWith("/outdir:") || arg.StartsWith("/fshname:"))
+                            if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase)
+                                || arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase)
+                                || arg.StartsWith("/outdir:", StringComparison.OrdinalIgnoreCase)
+                                || arg.StartsWith("/fshname:", StringComparison.OrdinalIgnoreCase))
                             {
-                                if (arg.StartsWith("/b:") || arg.StartsWith("/a:"))
+                                if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase) || arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase))
                                 {
                                     string split = arg.Substring(3, (arg.Length - 3));
 
@@ -97,7 +103,7 @@ namespace fshwrite
                                         throw new ArgumentException(string.Concat("The ", arg.Substring(0, 3), " path must not be empty"));
                                     }
                                 }
-                                else if (arg.StartsWith("/outdir:"))
+                                else if (arg.StartsWith("/outdir:", StringComparison.OrdinalIgnoreCase))
                                 {
                                     string dir = arg.Substring(8, (arg.Length - 8));
                                     if (!string.IsNullOrEmpty(dir))
@@ -116,7 +122,7 @@ namespace fshwrite
                                         throw new ArgumentException("The /outdir: path must not be empty");
                                     }
                                 }
-                                else if (arg.StartsWith("/fshname:"))
+                                else if (arg.StartsWith("/fshname:", StringComparison.OrdinalIgnoreCase))
                                 {
                                     string name = arg.Substring(9, (arg.Length - 9));
                                     if (!string.IsNullOrEmpty(name))
@@ -127,7 +133,7 @@ namespace fshwrite
 
                                 if (i == count && form.color != null)
                                 {
-                                    if (form.bmpbox.Text.StartsWith("hd"))
+                                    if (form.bmpbox.Text.StartsWith("hd", StringComparison.OrdinalIgnoreCase))
                                     {
                                         if (form.alpha != null)
                                         {
@@ -161,7 +167,7 @@ namespace fshwrite
                                     form.Writebtn_Click(null, null);
                                 }
                             }
-                            else if (arg.StartsWith("/?"))
+                            else if (arg.StartsWith("/?", StringComparison.Ordinal))
                             {
                                 ShowHelp();
                             }
