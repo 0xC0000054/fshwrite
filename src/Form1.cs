@@ -67,11 +67,11 @@ namespace fshwrite
                 if (code == 0x7F) // 24-bit RGB
                 {
                     byte[] px = new byte[3];
-                    BitmapData d = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData colorData = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
                     for (int y = 0; y < color.Height; y++)
                     {
-                        byte* p = (byte*)d.Scan0 + (y * color.Width * 3);
+                        byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
                         for (int x = 0; x < color.Width; x++)
                         {
                             px[0] = p[0];
@@ -82,24 +82,24 @@ namespace fshwrite
                         }
                     }
 
-                    color.UnlockBits(d);
+                    color.UnlockBits(colorData);
                 }
                 else if (code == 0x7D) // 32-bit RGBA
                 {
                     byte[] px = new byte[4];
-                    BitmapData d = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                    BitmapData al = null;
+                    BitmapData colorData = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                    BitmapData alphaData = null;
 
                     try
                     {
                         if (alpha != null)
                         {
-                            al = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                            alphaData = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
                             for (int y = 0; y < color.Height; y++)
                             {
-                                byte* p = (byte*)d.Scan0 + (y * color.Width * 4);
-                                byte* a = (byte*)al.Scan0 + (y * alpha.Width * 4);
+                                byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
+                                byte* a = (byte*)alphaData.Scan0 + (y * alphaData.Stride);
 
                                 for (int x = 0; x < color.Width; x++)
                                 {
@@ -117,7 +117,7 @@ namespace fshwrite
                         {
                             for (int y = 0; y < color.Height; y++)
                             {
-                                byte* p = (byte*)d.Scan0 + (y * color.Width * 4);
+                                byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
 
                                 for (int x = 0; x < color.Width; x++)
                                 {
@@ -133,10 +133,10 @@ namespace fshwrite
                     }
                     finally
                     {
-                        color.UnlockBits(d);
+                        color.UnlockBits(colorData);
                         if (alpha != null)
                         {
-                            alpha.UnlockBits(al);
+                            alpha.UnlockBits(alphaData);
                         }
                     }
 
