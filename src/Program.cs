@@ -47,6 +47,7 @@ namespace fshwrite
                         else
                         {
                             string rootdir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+                            bool saveAsUncompressed = false;
 
                             for (int i = 0; i < args.Length; i++)
                             {
@@ -115,11 +116,16 @@ namespace fshwrite
                                         form.fshname = name;
                                     }
                                 }
+                                else if (arg.Equals("/hd", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    saveAsUncompressed = true;
+                                }
                             }
 
                             if (form.color != null)
                             {
-                                if (Path.GetFileName(form.bmpbox.Text).StartsWith("hd", StringComparison.OrdinalIgnoreCase))
+                                if (saveAsUncompressed
+                                    || Path.GetFileName(form.bmpbox.Text).StartsWith("hd", StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (form.alpha != null)
                                     {
