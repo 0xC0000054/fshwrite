@@ -166,7 +166,7 @@ namespace fshwrite
                                     form.Writebtn_Click(null, null);
                                 }
                             }
-                            else if (arg.StartsWith("/?", StringComparison.Ordinal))
+                            else if (arg.Equals("/?", StringComparison.Ordinal))
                             {
                                 ShowHelp();
                             }
