@@ -40,31 +40,18 @@ namespace fshwrite
 
                     if (args.Length > 0)
                     {
-                        int count = -1;
-                        for (int i = 0; i < args.Length; i++)
+                        if (args.Length == 1 && args[0].Equals("/?", StringComparison.Ordinal))
                         {
-                            string arg = args[i];
-
-                            if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase)
-                                || arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase)
-                                || arg.StartsWith("/outdir:", StringComparison.OrdinalIgnoreCase)
-                                || arg.StartsWith("/fshname:", StringComparison.OrdinalIgnoreCase))
-                            {
-                                count++;
-                            }
+                            ShowHelp();
                         }
-
-                        string rootdir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
-
-                        for (int i = 0; i < args.Length; i++)
+                        else
                         {
-                            string arg = args[i];
+                            string rootdir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
-                            if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase)
-                                || arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase)
-                                || arg.StartsWith("/outdir:", StringComparison.OrdinalIgnoreCase)
-                                || arg.StartsWith("/fshname:", StringComparison.OrdinalIgnoreCase))
+                            for (int i = 0; i < args.Length; i++)
                             {
+                                string arg = args[i];
+
                                 if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase) || arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase))
                                 {
                                     string split = arg.Substring(3, (arg.Length - 3));
@@ -128,47 +115,43 @@ namespace fshwrite
                                         form.fshname = name;
                                     }
                                 }
+                            }
 
-                                if (i == count && form.color != null)
+                            if (form.color != null)
+                            {
+                                if (Path.GetFileName(form.bmpbox.Text).StartsWith("hd", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    if (Path.GetFileName(form.bmpbox.Text).StartsWith("hd", StringComparison.OrdinalIgnoreCase))
+                                    if (form.alpha != null)
                                     {
-                                        if (form.alpha != null)
+                                        form.TypeBox1.SelectedIndex = 1; // 32-bit
+                                    }
+                                    else
+                                    {
+                                        form.TypeBox1.SelectedIndex = 0; //24-bit
+                                    }
+                                }
+                                else
+                                {
+                                    if (form.hasSSE2)
+                                    {
+                                        // Images with one-bit alpha (all values either 0 or 255) can use DXT1 instead of DXT3.
+                                        if (form.alpha != null && !IsOneBitAlpha(form.alpha))
                                         {
-                                            form.TypeBox1.SelectedIndex = 1; // 32-bit
+                                            form.TypeBox1.SelectedIndex = 3; //Dxt3
                                         }
                                         else
                                         {
-                                            form.TypeBox1.SelectedIndex = 0; //24-bit
+                                            form.TypeBox1.SelectedIndex = 2; //Dxt1
                                         }
                                     }
                                     else
                                     {
-                                        if (form.hasSSE2)
-                                        {
-                                            // Images with one-bit alpha (all values either 0 or 255) can use DXT1 instead of DXT3.
-                                            if (form.alpha != null && !IsOneBitAlpha(form.alpha))
-                                            {
-                                                form.TypeBox1.SelectedIndex = 3; //Dxt3
-                                            }
-                                            else
-                                            {
-                                                form.TypeBox1.SelectedIndex = 2; //Dxt1
-                                            }
-                                        }
-                                        else
-                                        {
-                                            throw new Exception("A processor that supports SSE2 is required to save DXT1 and DXT3 fsh images");
-                                        }
+                                        throw new Exception("A processor that supports SSE2 is required to save DXT1 and DXT3 fsh images");
                                     }
-
-                                    form.dirBox1.Text = "FiSH";
-                                    form.Writebtn_Click(null, null);
                                 }
-                            }
-                            else if (arg.Equals("/?", StringComparison.Ordinal))
-                            {
-                                ShowHelp();
+
+                                form.dirBox1.Text = "FiSH";
+                                form.Writebtn_Click(null, null);
                             }
                         }
                     }
