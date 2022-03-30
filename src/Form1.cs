@@ -168,6 +168,7 @@ namespace fshwrite
                             byte[] px = new byte[] { p[0], p[1], p[2], a[0] };
                             ms.Write(px, 0, 4);
                             p += 4;
+                            a += 4;
                         }
                     }
 
