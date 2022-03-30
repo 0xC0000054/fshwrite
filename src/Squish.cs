@@ -3,39 +3,29 @@
 
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
 namespace fshwrite
 {
     internal static class Squish
     {
-        internal static byte[] CompressImage(Bitmap image, int flags)
+        internal static byte[] CompressImage(Bitmap color, Bitmap alpha, int flags)
         {
-            byte[] pixelData = new byte[image.Width * image.Height * 4];
+            byte[] pixelData = CreatePixelDataBuffer(color, alpha);
 
-            for (int y = 0; y < image.Height; y++)
-            {
-                for (int x = 0; x < image.Width; x++)
-                {
-                    Color pixel = image.GetPixel(x, y);
-                    int Offset = (y * image.Width * 4) + (x * 4);
-
-                    pixelData[Offset + 0] = pixel.R;
-                    pixelData[Offset + 1] = pixel.G;
-                    pixelData[Offset + 2] = pixel.B;
-                    pixelData[Offset + 3] = pixel.A;
-                }
-            }
+            int width = color.Width;
+            int height = color.Height;
 
             // Compute size of compressed block area, and allocate
-            int blockCount = ((image.Width + 3) / 4) * ((image.Height + 3) / 4);
+            int blockCount = ((width + 3) / 4) * ((height + 3) / 4);
             int blockSize = ((flags & (int)SquishCompFlags.kDxt1) != 0) ? 8 : 16;
 
             // Allocate room for compressed blocks
             byte[] blockData = new byte[blockCount * blockSize];
 
             // Invoke squish::CompressImage() with the required parameters
-            CompressImageWrapper(pixelData, image.Width, image.Height, blockData, flags);
+            CompressImageWrapper(pixelData, width, height, blockData, flags);
 
             // Return our block data to caller..
             return blockData;
@@ -57,6 +47,85 @@ namespace fshwrite
                     }
                 }
             }
+        }
+
+        private static unsafe byte[] CreatePixelDataBuffer(Bitmap color, Bitmap alpha)
+        {
+            int width = color.Width;
+            int height = color.Height;
+
+            byte[] pixelData = new byte[width * height * 4];
+
+            BitmapData colorData = color.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData alphaData = null;
+
+            try
+            {
+                byte* colorScan0 = (byte*)colorData.Scan0;
+                int colorStride = colorData.Stride;
+                int destStride = width * 4;
+
+                fixed (byte* destScan0 = pixelData)
+                {
+                    if (alpha != null)
+                    {
+                        alphaData = alpha.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+                        byte* alphaScan0 = (byte*)alphaData.Scan0;
+                        int alphaStride = alphaData.Stride;
+
+                        for (int y = 0; y < height; y++)
+                        {
+                            byte* colorPtr = colorScan0 + (y * colorStride);
+                            byte* alphaPtr = alphaScan0 + (y * alphaStride);
+                            byte* dest = destScan0 + (y * destStride);
+
+                            for (int x = 0; x < width; x++)
+                            {
+                                // The color bitmap is BGR and the destination is RGB.
+                                dest[0] = colorPtr[2];
+                                dest[1] = colorPtr[1];
+                                dest[2] = colorPtr[0];
+                                dest[3] = alphaPtr[0];
+
+                                colorPtr += 4;
+                                alphaPtr += 4;
+                                dest += 4;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int y = 0; y < height; y++)
+                        {
+                            byte* colorPtr = colorScan0 + (y * colorStride);
+                            byte* dest = destScan0 + (y * destStride);
+
+                            for (int x = 0; x < width; x++)
+                            {
+                                // The color bitmap is BGR and the destination is RGB.
+                                dest[0] = colorPtr[2];
+                                dest[1] = colorPtr[1];
+                                dest[2] = colorPtr[0];
+                                dest[3] = 255;
+
+                                colorPtr += 4;
+                                dest += 4;
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                color.UnlockBits(colorData);
+                if (alpha != null)
+                {
+                    alpha.UnlockBits(alphaData);
+                }
+            }
+
+            return pixelData;
         }
 
         private static bool Is64bit()

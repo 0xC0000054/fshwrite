@@ -37,74 +37,6 @@ namespace fshwrite
         }
 
         /// <summary>
-        /// Builds the alpha channel bitmap if it does not exist
-        /// </summary>
-        internal void PrepareAlpha()
-        {
-            if (color != null && alpha == null)
-            {
-                alpha = new Bitmap(color.Width, color.Height);
-
-                for (int y = 0; y < alpha.Height; y++)
-                {
-                    for (int x = 0; x < alpha.Width; x++)
-                    {
-                        alpha.SetPixel(x, y, Color.White);
-                    }
-                }
-            }
-        }
-
-        internal Bitmap BlendBmp(Bitmap colorbmp, Bitmap bmpalpha)
-        {
-            Bitmap image = null;
-            if (colorbmp != null && bmpalpha != null)
-            {
-                image = new Bitmap(colorbmp.Width, colorbmp.Height, PixelFormat.Format32bppArgb);
-            }
-            if (colorbmp.Size != bmpalpha.Size)
-            {
-                throw new ArgumentException("The bitmap and alpha must be equal size");
-            }
-            BitmapData colordata = colorbmp.LockBits(new Rectangle(0, 0, colorbmp.Width, colorbmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-            BitmapData alphadata = bmpalpha.LockBits(new Rectangle(0, 0, bmpalpha.Width, bmpalpha.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-            BitmapData bdata = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            IntPtr scan0 = bdata.Scan0;
-            unsafe
-            {
-                byte* clrdata = (byte*)(void*)colordata.Scan0;
-                byte* aldata = (byte*)(void*)alphadata.Scan0;
-                byte* destdata = (byte*)(void*)scan0;
-                int offset = bdata.Stride - image.Width * 4;
-                int clroffset = colordata.Stride - image.Width * 4;
-                int aloffset = alphadata.Stride - image.Width * 4;
-                for (int y = 0; y < image.Height; y++)
-                {
-                    for (int x = 0; x < image.Width; x++)
-                    {
-                        destdata[3] = aldata[0];
-                        destdata[0] = clrdata[0];
-                        destdata[1] = clrdata[1];
-                        destdata[2] = clrdata[2];
-
-
-                        destdata += 4;
-                        clrdata += 4;
-                        aldata += 4;
-                    }
-                    destdata += offset;
-                    clrdata += clroffset;
-                    aldata += aloffset;
-                }
-
-            }
-            colorbmp.UnlockBits(colordata);
-            bmpalpha.UnlockBits(alphadata);
-            image.UnlockBits(bdata);
-            return image;
-        }
-
-        /// <summary>
         /// The function that writes the fsh
         /// </summary>
         /// <param name="code">The bitmap type in the fsh entry header </param>
@@ -154,64 +86,76 @@ namespace fshwrite
                 }
                 else if (code == 0x7D) // 32-bit RGBA
                 {
-                    if (alpha == null)
-                    {
-                        PrepareAlpha();
-                    }
-
                     byte[] px = new byte[4];
                     BitmapData d = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                    BitmapData al = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                    BitmapData al = null;
 
-                    for (int y = 0; y < color.Height; y++)
+                    try
                     {
-                        byte* p = (byte*)d.Scan0 + (y * color.Width * 4);
-                        byte* a = (byte*)al.Scan0 + (y * alpha.Width * 4);
-
-                        for (int x = 0; x < color.Width; x++)
+                        if (alpha != null)
                         {
-                            px[0] = p[0];
-                            px[1] = p[1];
-                            px[2] = p[2];
-                            px[3] = a[0];
-                            writer.Write(px, 0, 4);
-                            p += 4;
-                            a += 4;
+                            al = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+                            for (int y = 0; y < color.Height; y++)
+                            {
+                                byte* p = (byte*)d.Scan0 + (y * color.Width * 4);
+                                byte* a = (byte*)al.Scan0 + (y * alpha.Width * 4);
+
+                                for (int x = 0; x < color.Width; x++)
+                                {
+                                    px[0] = p[0];
+                                    px[1] = p[1];
+                                    px[2] = p[2];
+                                    px[3] = a[0];
+                                    writer.Write(px, 0, 4);
+                                    p += 4;
+                                    a += 4;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int y = 0; y < color.Height; y++)
+                            {
+                                byte* p = (byte*)d.Scan0 + (y * color.Width * 4);
+
+                                for (int x = 0; x < color.Width; x++)
+                                {
+                                    px[0] = p[0];
+                                    px[1] = p[1];
+                                    px[2] = p[2];
+                                    px[3] = 255;
+                                    writer.Write(px, 0, 4);
+                                    p += 4;
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        color.UnlockBits(d);
+                        if (alpha != null)
+                        {
+                            alpha.UnlockBits(al);
                         }
                     }
 
-                    color.UnlockBits(d);
-                    alpha.UnlockBits(al);
                 }
                 else if (code == 0x60) //DXT1
                 {
-                    if (alpha == null)
-                    {
-                        PrepareAlpha();
-                    }
-
-                    Bitmap temp = BlendBmp(color, alpha);
-
                     int flags = (int)SquishCompFlags.kDxt1;
                     flags |= (int)SquishCompFlags.kColourIterativeClusterFit;
 
-                    byte[] data = Squish.CompressImage(temp, flags);
+                    byte[] data = Squish.CompressImage(color, alpha, flags);
 
                     writer.Write(data, 0, data.Length);
                 }
                 else if (code == 0x61) // DXT3
                 {
-                    if (alpha == null)
-                    {
-                        PrepareAlpha();
-                    }
-
-                    Bitmap temp = BlendBmp(color, alpha);
-
                     int flags = (int)SquishCompFlags.kDxt3;
                     flags |= (int)SquishCompFlags.kColourIterativeClusterFit;
 
-                    byte[] data = Squish.CompressImage(temp, flags);
+                    byte[] data = Squish.CompressImage(color, alpha, flags);
 
                     writer.Write(data, 0, data.Length);
                 }
