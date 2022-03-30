@@ -65,32 +65,44 @@ namespace fshwrite
 
                 if (code == 0x7F) // 24-bit RGB
                 {
-                    byte[] px = new byte[3];
                     BitmapData colorData = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
-                    for (int y = 0; y < color.Height; y++)
+                    try
                     {
-                        byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
-                        for (int x = 0; x < color.Width; x++)
+                        byte[] rowData = new byte[colorData.Width * 3];
+
+                        for (int y = 0; y < color.Height; y++)
                         {
-                            px[0] = p[0];
-                            px[1] = p[1];
-                            px[2] = p[2];
-                            writer.Write(px, 0, 3);
-                            p += 3;
+                            byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
+                            int index = 0;
+
+                            for (int x = 0; x < color.Width; x++)
+                            {
+                                rowData[index + 0] = p[0];
+                                rowData[index + 1] = p[1];
+                                rowData[index + 2] = p[2];
+
+                                p += 3;
+                                index += 3;
+                            }
+
+                            writer.Write(rowData, 0, rowData.Length);
                         }
                     }
-
-                    color.UnlockBits(colorData);
+                    finally
+                    {
+                        color.UnlockBits(colorData);
+                    }
                 }
                 else if (code == 0x7D) // 32-bit RGBA
                 {
-                    byte[] px = new byte[4];
                     BitmapData colorData = color.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
                     BitmapData alphaData = null;
 
                     try
                     {
+                        byte[] rowData = new byte[colorData.Width * 4];
+
                         if (alpha != null)
                         {
                             alphaData = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
@@ -99,17 +111,21 @@ namespace fshwrite
                             {
                                 byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
                                 byte* a = (byte*)alphaData.Scan0 + (y * alphaData.Stride);
+                                int index = 0;
 
                                 for (int x = 0; x < color.Width; x++)
                                 {
-                                    px[0] = p[0];
-                                    px[1] = p[1];
-                                    px[2] = p[2];
-                                    px[3] = a[0];
-                                    writer.Write(px, 0, 4);
+                                    rowData[index + 0] = p[0];
+                                    rowData[index + 1] = p[1];
+                                    rowData[index + 2] = p[2];
+                                    rowData[index + 3] = a[0];
+
                                     p += 4;
                                     a += 4;
+                                    index += 4;
                                 }
+
+                                writer.Write(rowData, 0, rowData.Length);
                             }
                         }
                         else
@@ -117,16 +133,20 @@ namespace fshwrite
                             for (int y = 0; y < color.Height; y++)
                             {
                                 byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
+                                int index = 0;
 
                                 for (int x = 0; x < color.Width; x++)
                                 {
-                                    px[0] = p[0];
-                                    px[1] = p[1];
-                                    px[2] = p[2];
-                                    px[3] = 255;
-                                    writer.Write(px, 0, 4);
+                                    rowData[index + 0] = p[0];
+                                    rowData[index + 1] = p[1];
+                                    rowData[index + 2] = p[2];
+                                    rowData[index + 3] = 255;
+
                                     p += 4;
+                                    index += 4;
                                 }
+
+                                writer.Write(rowData, 0, rowData.Length);
                             }
                         }
                     }
