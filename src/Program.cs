@@ -79,23 +79,20 @@ namespace fshwrite
                                         FileInfo fi = new FileInfo(split);
                                         if (fi.Exists)
                                         {
-                                            if (fi.Extension.Equals(".png", StringComparison.OrdinalIgnoreCase) || fi.Extension.Equals(".bmp", StringComparison.OrdinalIgnoreCase))
+                                            if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase))
                                             {
-                                                if (arg.StartsWith("/b:", StringComparison.OrdinalIgnoreCase))
+                                                form.color = new Bitmap(fi.FullName);
+                                                form.bmpbox.Text = fi.FullName;
+                                                string alpath = Path.Combine(fi.DirectoryName, Path.GetFileNameWithoutExtension(fi.FullName) + "_a" + fi.Extension);
+                                                if (File.Exists(alpath))
                                                 {
-                                                    form.color = new Bitmap(fi.FullName);
-                                                    form.bmpbox.Text = fi.FullName;
-                                                    string alpath = Path.Combine(fi.DirectoryName, Path.GetFileNameWithoutExtension(fi.FullName) + "_a" + fi.Extension);
-                                                    if (File.Exists(alpath))
-                                                    {
-                                                        form.alpha = new Bitmap(alpath);
-                                                    }
+                                                    form.alpha = new Bitmap(alpath);
                                                 }
-                                                else if (arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    form.alpha = new Bitmap(fi.FullName);
-                                                    form.alphabox.Text = fi.FullName;
-                                                }
+                                            }
+                                            else if (arg.StartsWith("/a:", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                form.alpha = new Bitmap(fi.FullName);
+                                                form.alphabox.Text = fi.FullName;
                                             }
                                         }
                                     }
