@@ -1,7 +1,6 @@
 ﻿// Copyright 2009, 2022 Nicholas Hayes
 // SPDX-License-Identifier: MIT
 
-
 using System;
 using System.Windows.Forms;
 using System.IO;
