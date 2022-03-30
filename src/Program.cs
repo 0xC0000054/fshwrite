@@ -134,7 +134,7 @@ namespace fshwrite
 
                                 if (i == count && form.color != null)
                                 {
-                                    if (form.bmpbox.Text.StartsWith("hd", StringComparison.OrdinalIgnoreCase))
+                                    if (Path.GetFileName(form.bmpbox.Text).StartsWith("hd", StringComparison.OrdinalIgnoreCase))
                                     {
                                         if (form.alpha != null)
                                         {
