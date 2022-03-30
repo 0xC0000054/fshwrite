@@ -44,29 +44,12 @@ namespace fshwrite
             if (color != null && alpha == null)
             {
                 alpha = new Bitmap(color.Width, color.Height);
-                if (Path.GetExtension(bmpbox.Text).Equals(".png", StringComparison.OrdinalIgnoreCase) && color.PixelFormat == PixelFormat.Format32bppArgb)
+
+                for (int y = 0; y < alpha.Height; y++)
                 {
-                    for (int y = 0; y < alpha.Height; y++)
+                    for (int x = 0; x < alpha.Width; x++)
                     {
-                        for (int x = 0; x < alpha.Width; x++)
-                        {
-                            Color srcpxl = color.GetPixel(x, y);
-                            alpha.SetPixel(x, y, Color.FromArgb(srcpxl.A, srcpxl.A, srcpxl.A, srcpxl.A));
-                            while (alpha.GetPixel(x, y).A < 255)
-                            {
-                                alpha.SetPixel(x, y, Color.FromArgb(srcpxl.A, srcpxl.A, srcpxl.A));
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (int y = 0; y < alpha.Height; y++)
-                    {
-                        for (int x = 0; x < alpha.Width; x++)
-                        {
-                            alpha.SetPixel(x, y, Color.White);
-                        }
+                        alpha.SetPixel(x, y, Color.White);
                     }
                 }
             }
