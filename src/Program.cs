@@ -261,7 +261,7 @@ namespace fshwrite
 
         private static void ShowHelp()
         {
-            MessageBox.Show("fshwrite /b:<Bitmap> [/a:<alpha>] [/outdir:<directory>] [/fshname:<name>] [/?]\n\n /b:<Bitmap> the input bitmap. \n /a:<alpha> the input alpha. \n /outdir:<directory> the directory to put the output files. \n /fshname:<name> the name of the output fsh. \n /? show this help. \n\n parameters in brackets are optional. \n Paths containing spaces must be encased in quotes.", "fshwrite");
+            MessageBox.Show("fshwrite /b:<Bitmap> [/a:<alpha>] [/outdir:<directory>] [/fshname:<name>] [/hd] [/zoom5hd] [/?]\n\n /b:<Bitmap> the input bitmap. \n /a:<alpha> the input alpha. \n /outdir:<directory> the directory to put the output files. \n /fshname:<name> the name of the output fsh. \n /hd Save the image as uncompressed. \n /zoom5hd Save the Bat4Max zoom 5 images as uncompressed. \n /? show this help. \n\n parameters in brackets are optional. \n Paths containing spaces must be encased in quotes.", "fshwrite");
         }
     }
 }
