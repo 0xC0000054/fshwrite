@@ -39,11 +39,11 @@ namespace fshwrite
                 {
                     if (Is64bit())
                     {
-                        Squish_64.SquishCompressImage(RGBA, width, height, Blocks, flags);
+                        Squish_64.CompressImage(RGBA, width, height, Blocks, flags);
                     }
                     else
                     {
-                        Squish_32.SquishCompressImage(RGBA, width, height, Blocks, flags);
+                        Squish_32.CompressImage(RGBA, width, height, Blocks, flags);
                     }
                 }
             }
@@ -136,13 +136,13 @@ namespace fshwrite
         private sealed class Squish_32
         {
             [DllImport("Squish_Win32.dll")]
-            internal static unsafe extern void SquishCompressImage(byte* rgba, int width, int height, byte* blocks, int flags);
+            internal static unsafe extern void CompressImage(byte* rgba, int width, int height, byte* blocks, int flags);
         }
 
         private sealed class Squish_64
         {
             [DllImport("squish_x64.dll")]
-            internal static unsafe extern void SquishCompressImage(byte* rgba, int width, int height, byte* blocks, int flags);
+            internal static unsafe extern void CompressImage(byte* rgba, int width, int height, byte* blocks, int flags);
         }
     }
 }
