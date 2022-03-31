@@ -48,6 +48,7 @@ namespace fshwrite
                         {
                             string rootdir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
                             bool saveAsUncompressed = false;
+                            bool zoom5Uncompressed = false;
 
                             for (int i = 0; i < args.Length; i++)
                             {
@@ -120,11 +121,16 @@ namespace fshwrite
                                 {
                                     saveAsUncompressed = true;
                                 }
+                                else if (arg.Equals("/zoom5hd", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    zoom5Uncompressed = true;
+                                }
                             }
 
                             if (form.color != null)
                             {
                                 if (saveAsUncompressed
+                                    || (zoom5Uncompressed && IsZoom5OutputFileName(form.fshname))
                                     || Path.GetFileName(form.bmpbox.Text).StartsWith("hd", StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (form.alpha != null)
@@ -212,6 +218,46 @@ namespace fshwrite
 
             return true;
         }
+
+        private static bool IsZoom5OutputFileName(string fileName)
+        {
+            // The Bat4Max output file name uses the following format: Type_Group_Instance.fsh.
+            // SimCity 4 FSH files always use the type id: 7ab50e44.
+            if (!string.IsNullOrEmpty(fileName)
+                && fileName.StartsWith("7ab50e44", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] parts = Path.GetFileNameWithoutExtension(fileName).Split('_');
+
+                if (parts.Length == 3)
+                {
+                    string instancePart = parts[2];
+
+                    if (!string.IsNullOrEmpty(instancePart))
+                    {
+                        // DatCmd pads the instance ids that are less than 8 characters with leading zeros.
+                        if (instancePart.Length < 8)
+                        {
+                            instancePart = instancePart.PadLeft(8, '0');
+                        }
+
+                        // The generated BAT instance ids use the following format: 0xAAAABCDE
+                        // A = Model-specific ID number
+                        // B = Normal Map(0) or Lighting Map(8)
+                        // C = Zoom level
+                        // D = Rotation
+                        // E = FSH frame number
+
+                        char zoomLevel = instancePart[5];
+
+                        // The zoom level is encoded as zoom - 1, so zoom5 5 uses the value '4'.
+                        return zoomLevel == '4';
+                    }
+                }
+            }
+
+            return false;
+        }
+
 
         private static void ShowHelp()
         {
