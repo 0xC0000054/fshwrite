@@ -133,7 +133,8 @@ namespace fshwrite
                                     || (zoom5Uncompressed && IsZoom5OutputFileName(form.fshname))
                                     || Path.GetFileName(form.bmpbox.Text).StartsWith("hd", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    if (form.alpha != null)
+                                    // Images with opaque alpha (all values 255) can use 24-bit instead of 32-bit.
+                                    if (form.alpha != null && !IsOpaqueAlpha(form.alpha))
                                     {
                                         form.TypeBox1.SelectedIndex = 1; // 32-bit
                                     }
@@ -203,6 +204,40 @@ namespace fshwrite
                     for (int x = 0; x < width; x++)
                     {
                         if (*p > 0 && *p < 255)
+                        {
+                            return false;
+                        }
+
+                        p += 3;
+                    }
+                }
+            }
+            finally
+            {
+                alpha.UnlockBits(data);
+            }
+
+            return true;
+        }
+
+        private static unsafe bool IsOpaqueAlpha(Bitmap alpha)
+        {
+            int width = alpha.Width;
+            int height = alpha.Height;
+
+            BitmapData data = alpha.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            try
+            {
+                byte* scan0 = (byte*)data.Scan0.ToPointer();
+                int stride = data.Stride;
+
+                for (int y = 0; y < height; y++)
+                {
+                    byte* p = scan0 + (y * stride);
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (*p < 255)
                         {
                             return false;
                         }
