@@ -73,16 +73,16 @@ namespace fshwrite
 
                         for (int y = 0; y < color.Height; y++)
                         {
-                            byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
+                            byte* colorPtr = (byte*)colorData.Scan0 + (y * colorData.Stride);
                             int index = 0;
 
                             for (int x = 0; x < color.Width; x++)
                             {
-                                rowData[index + 0] = p[0];
-                                rowData[index + 1] = p[1];
-                                rowData[index + 2] = p[2];
+                                rowData[index + 0] = colorPtr[0];
+                                rowData[index + 1] = colorPtr[1];
+                                rowData[index + 2] = colorPtr[2];
 
-                                p += 3;
+                                colorPtr += 3;
                                 index += 3;
                             }
 
@@ -109,19 +109,19 @@ namespace fshwrite
 
                             for (int y = 0; y < color.Height; y++)
                             {
-                                byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
-                                byte* a = (byte*)alphaData.Scan0 + (y * alphaData.Stride);
+                                byte* colorPtr = (byte*)colorData.Scan0 + (y * colorData.Stride);
+                                byte* alphaPtr = (byte*)alphaData.Scan0 + (y * alphaData.Stride);
                                 int index = 0;
 
                                 for (int x = 0; x < color.Width; x++)
                                 {
-                                    rowData[index + 0] = p[0];
-                                    rowData[index + 1] = p[1];
-                                    rowData[index + 2] = p[2];
-                                    rowData[index + 3] = a[0];
+                                    rowData[index + 0] = colorPtr[0];
+                                    rowData[index + 1] = colorPtr[1];
+                                    rowData[index + 2] = colorPtr[2];
+                                    rowData[index + 3] = alphaPtr[0];
 
-                                    p += 4;
-                                    a += 4;
+                                    colorPtr += 4;
+                                    alphaPtr += 4;
                                     index += 4;
                                 }
 
@@ -132,17 +132,17 @@ namespace fshwrite
                         {
                             for (int y = 0; y < color.Height; y++)
                             {
-                                byte* p = (byte*)colorData.Scan0 + (y * colorData.Stride);
+                                byte* colorPtr = (byte*)colorData.Scan0 + (y * colorData.Stride);
                                 int index = 0;
 
                                 for (int x = 0; x < color.Width; x++)
                                 {
-                                    rowData[index + 0] = p[0];
-                                    rowData[index + 1] = p[1];
-                                    rowData[index + 2] = p[2];
+                                    rowData[index + 0] = colorPtr[0];
+                                    rowData[index + 1] = colorPtr[1];
+                                    rowData[index + 2] = colorPtr[2];
                                     rowData[index + 3] = 255;
 
-                                    p += 4;
+                                    colorPtr += 4;
                                     index += 4;
                                 }
 
