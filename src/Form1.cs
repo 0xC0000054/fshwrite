@@ -105,7 +105,7 @@ namespace fshwrite
 
                         if (alpha != null)
                         {
-                            alphaData = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                            alphaData = alpha.LockBits(new Rectangle(0, 0, colorData.Width, colorData.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
                             for (int y = 0; y < colorData.Height; y++)
                             {
