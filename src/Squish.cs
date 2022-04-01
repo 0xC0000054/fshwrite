@@ -82,11 +82,22 @@ namespace fshwrite
 
                             for (int x = 0; x < width; x++)
                             {
-                                // The color bitmap is BGR and the destination is RGB.
-                                dest[0] = colorPtr[2];
-                                dest[1] = colorPtr[1];
-                                dest[2] = colorPtr[0];
-                                dest[3] = alphaPtr[0];
+                                byte a = alphaPtr[0];
+
+                                if (a == 0)
+                                {
+                                    dest[0] = 0;
+                                    dest[1] = 0;
+                                    dest[2] = 0;
+                                }
+                                else
+                                {
+                                    // The color bitmap is BGR and the destination is RGB.
+                                    dest[0] = colorPtr[2];
+                                    dest[1] = colorPtr[1];
+                                    dest[2] = colorPtr[0];
+                                }
+                                dest[3] = a;
 
                                 colorPtr += 4;
                                 alphaPtr += 4;

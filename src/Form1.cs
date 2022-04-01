@@ -115,10 +115,21 @@ namespace fshwrite
 
                                 for (int x = 0; x < color.Width; x++)
                                 {
-                                    rowData[index + 0] = colorPtr[0];
-                                    rowData[index + 1] = colorPtr[1];
-                                    rowData[index + 2] = colorPtr[2];
-                                    rowData[index + 3] = alphaPtr[0];
+                                    byte a = alphaPtr[0];
+
+                                    if (a == 0)
+                                    {
+                                        rowData[index + 0] = 0;
+                                        rowData[index + 1] = 0;
+                                        rowData[index + 2] = 0;
+                                    }
+                                    else
+                                    {
+                                        rowData[index + 0] = colorPtr[0];
+                                        rowData[index + 1] = colorPtr[1];
+                                        rowData[index + 2] = colorPtr[2];
+                                    }
+                                    rowData[index + 3] = a;
 
                                     colorPtr += 4;
                                     alphaPtr += 4;
