@@ -71,12 +71,12 @@ namespace fshwrite
                     {
                         byte[] rowData = new byte[colorData.Width * 3];
 
-                        for (int y = 0; y < color.Height; y++)
+                        for (int y = 0; y < colorData.Height; y++)
                         {
                             byte* colorPtr = (byte*)colorData.Scan0 + (y * colorData.Stride);
                             int index = 0;
 
-                            for (int x = 0; x < color.Width; x++)
+                            for (int x = 0; x < colorData.Width; x++)
                             {
                                 rowData[index + 0] = colorPtr[0];
                                 rowData[index + 1] = colorPtr[1];
@@ -107,13 +107,13 @@ namespace fshwrite
                         {
                             alphaData = alpha.LockBits(new Rectangle(0, 0, color.Width, color.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-                            for (int y = 0; y < color.Height; y++)
+                            for (int y = 0; y < colorData.Height; y++)
                             {
                                 byte* colorPtr = (byte*)colorData.Scan0 + (y * colorData.Stride);
                                 byte* alphaPtr = (byte*)alphaData.Scan0 + (y * alphaData.Stride);
                                 int index = 0;
 
-                                for (int x = 0; x < color.Width; x++)
+                                for (int x = 0; x < colorData.Width; x++)
                                 {
                                     byte a = alphaPtr[0];
 
@@ -141,12 +141,12 @@ namespace fshwrite
                         }
                         else
                         {
-                            for (int y = 0; y < color.Height; y++)
+                            for (int y = 0; y < colorData.Height; y++)
                             {
                                 byte* colorPtr = (byte*)colorData.Scan0 + (y * colorData.Stride);
                                 int index = 0;
 
-                                for (int x = 0; x < color.Width; x++)
+                                for (int x = 0; x < colorData.Width; x++)
                                 {
                                     rowData[index + 0] = colorPtr[0];
                                     rowData[index + 1] = colorPtr[1];
