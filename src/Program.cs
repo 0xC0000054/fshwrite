@@ -84,6 +84,10 @@ namespace fshwrite
                                                 form.alphabox.Text = fi.FullName;
                                             }
                                         }
+                                        else
+                                        {
+                                            throw new FileNotFoundException(string.Format("The specified file could not be found: \n\n {0}", fi.FullName));
+                                        }
                                     }
                                     else
                                     {
