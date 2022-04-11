@@ -13,7 +13,7 @@ To use the `/hd` and `/zoom5hd` commands you will need to edit `BuildingMill.ms`
 
 The fshwrite command starts with `fshwrite /b:`.
 
-Changing that command to `fshwrite /zoom5hd /b:` will make Bat4Max write the zoom 5 files as uncompressed, alternatively replacing `/zoom5hd` with `/hd` will make BAT4Max write all images as uncompressed. 
+Changing that command to `fshwrite /zoom5hd /b:` will make BAT4Max write the zoom 5 files as uncompressed, alternatively replacing `/zoom5hd` with `/hd` will make BAT4Max write all images as uncompressed. 
 
 ## License
 
