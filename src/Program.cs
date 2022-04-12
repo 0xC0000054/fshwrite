@@ -288,7 +288,7 @@ namespace fshwrite
 
                         char zoomLevel = instancePart[5];
 
-                        // The zoom level is encoded as zoom - 1, so zoom5 5 uses the value '4'.
+                        // The zoom level is encoded as zoom - 1, so zoom 5 uses the value '4'.
                         return zoomLevel == '4';
                     }
                 }
