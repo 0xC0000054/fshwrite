@@ -7,9 +7,11 @@ It compresses the DXT1 and DXT3 formats using [libsquish](https://github.com/svn
 
 Place `fshwrite.exe`, `squish_Win32.dll` and `squish_x64.dll` into `<3dsMax_Root>\gamepacks\BAT`, overwriting the existing files.
 
-## Updating BAT4Max to use the HD options 
+## Updating BAT4Max to use the HD options
 
-I recommend that you make a backup copy of the original script and the edited script. That way you can swap out the script in use depending on whether you are exporting a building or props/automata. Buildings should generally not need to use uncompressed textures. 
+The `/hd` and `/zoom5hd` options are intended for use in small props and automata, where the DXT compression can distort fine details in the exported textures. Buildings should generally not need to use uncompressed textures. 
+
+I recommend that you make a backup copy of the original script and the edited script. That way you can swap out the script in use depending on whether you are exporting a building or props/automata. 
 
 To use the `/hd` and `/zoom5hd` commands you will need to edit `BuildingMill.ms`. You should use search and replace to update every fshwrite call in the `BuildingMill.ms` script. 
 
